@@ -11,6 +11,7 @@ import { Password } from "../utils/password";
 import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
 import { Course } from "../models/courses.model";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = express.Router();
 
@@ -29,15 +30,41 @@ router.get("/api/courses",currentUser,requireAuth,async(req:Request,res:Response
 
 // Get all courses of a user from array of courses
   
-router.get("/api/courses/user",currentUser,requireAuth,async(req:Request,res:Response)=>{
+router.get("/api/courses/mine",currentUser,requireAuth,async(req:Request,res:Response)=>{
     const user=await User.findById(req.currentUser!.id);
     let courses=[];
     for(let i=0;i<user!.courses.length;i++){
         courses[i]=await Course.findById(user!.courses[i].courseId);
-
     }
 
     res.send(courses);
 
 });
 
+
+// Get a course by id with it's packages
+
+
+router.get("/api/courses/:id",currentUser,requireAuth,async(req:Request,res:Response)=>{
+    const course= await Course.findById(req.params.id).populate('packages.packageId');
+
+    res.send(course);
+})
+
+
+// Create a new course by admin
+
+router.post("/api/courses",[
+    body("title").not().isEmpty().withMessage("Title is required"),
+    body("description").not().isEmpty().withMessage("Description is required"),
+    body("image").not().isEmpty().withMessage("Image is required"),
+],validateRequest,currentUser,requireAuth,async(req:Request,res:Response)=>{
+    const {title,description,image}=req.body;
+    const course=Course.build({title,description,image,packages:[]});
+    await course.save();
+    res.status(201).send(course);
+});
+
+
+
+export { router as courseRoutes };

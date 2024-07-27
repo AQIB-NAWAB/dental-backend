@@ -1,19 +1,19 @@
 
 import express, { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { body, validationResult } from "express-validator";
+import { body} from "express-validator";
 
-import { RequestValidationError } from "../errors/request-validation-error";
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 
 import { User } from "../models/user.mode";
-import { Password } from "../utils/password";
 import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
 import { Ticket } from "../models/request.model";
-import mongoose from "mongoose";
 import { isAdmin } from "../middlewares/isAdmin";
+import  {sendEmail}  from "../utils/sendEmail";
+import fs from "fs";
+import path from "path";
 
 const router = express.Router();
 
@@ -27,12 +27,13 @@ router.post(
     body("courseId").not().isEmpty().withMessage("Course ID is required"),
     body("packageId").not().isEmpty().withMessage("Package ID is required"),
     body("paidThrough").not().isEmpty().withMessage("Payment method is required"),
+    body("pricePaid").not().isEmpty().withMessage("Price is required"),
   ],
   validateRequest,
   currentUser,
   requireAuth,
     async (req: Request, res: Response) => {
-        const { email, courseId, packageId, paidThrough, cardNumber } = req.body;
+        const { email, courseId, packageId, paidThrough, cardNumber,pricePaid } = req.body;
         
         const user= await User.findById(req.currentUser!.id);
         
@@ -54,10 +55,25 @@ router.post(
             packageId,
             paidThrough,
             cardNumber,
-            status: "pending"
+            status: "pending",
+            pricePaid
         });
 
         await ticket.save();
+        
+        const options = {
+          email: email,
+          subject: "Course Requested",
+          html: fs.readFileSync(path.join(__dirname, "../mailsTemplate/requestmail.html"), "utf-8"),
+        };
+
+        try{
+
+          sendEmail(options);
+        }catch(err){
+          console.log(err);
+          throw new BadRequestError("Email not sent");
+        }
 
         res.status(201).send(ticket);
 
@@ -72,7 +88,6 @@ router.get(
   "/api/tickets",
   currentUser,
   requireAuth,
-  isAdmin,
   async (req: Request, res: Response) => {
     const tickets = await Ticket.find({status:"pending"}).populate('courseId').populate('packageId');
     res.send(tickets);
@@ -88,7 +103,6 @@ router.delete(
   "/api/tickets/:id",
   currentUser,
   requireAuth,
-  isAdmin,
   async (req: Request, res: Response) => {
     const ticket = await Ticket.findById(req.params.id);
 
@@ -113,7 +127,6 @@ router.put(
     validateRequest,
   currentUser,
   requireAuth,
-  isAdmin,
   async (req: Request, res: Response) => {
     const ticket = await Ticket.findById(req.params.id);
 
@@ -157,4 +170,4 @@ router.put(
 
 
 
-export { router as RequestRoutes };
+export { router as requestRoutes };

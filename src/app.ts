@@ -11,7 +11,9 @@ import { errorHandler } from './middlewares/error-handler'
 // Routes
 
 import {userRoutes} from "./routes/userRoute"
-import {RequestRoutes} from "./routes/requestRoute"
+import {requestRoutes} from "./routes/requestRoute"
+import {courseRoutes} from "./routes/courseRoute"
+import {packageRoutes} from "./routes/packageRoute"
 
 // Error handler
 const app = express()
@@ -24,7 +26,9 @@ app.use(cookieSession({
 }))
 
 app.use(userRoutes)
-app.use(RequestRoutes)
+app.use(requestRoutes)
+app.use(courseRoutes)
+app.use(packageRoutes)
 
 app.all("*",()=>{
   throw new NotFoundError()

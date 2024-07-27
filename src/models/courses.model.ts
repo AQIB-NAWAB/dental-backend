@@ -7,7 +7,7 @@ interface CourseAttrs {
     title: string;
     description: string;
     image: string;
-
+    packages:Array<{packageId:mongoose.Schema.Types.ObjectId}>;
 }
 
 interface CourseModel extends mongoose.Model<CourseDoc> {
@@ -18,6 +18,7 @@ interface CourseDoc extends mongoose.Document {
     title: string;
     description: string;
     image: string;
+    packages:Array<{packageId:mongoose.Schema.Types.ObjectId}>;
 }
 
 const courseSchema = new mongoose.Schema({
@@ -33,12 +34,19 @@ const courseSchema = new mongoose.Schema({
         type: String,
         required: true,
     }
+    ,
+    packages: [{
+        packageId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Package',
+            required: true
+        }
+    }]
 }, {
     toJSON: {
         transform(doc, ret) {
             ret.id = ret._id;
             delete ret._id;
-            delete ret.password;
             delete ret.__v;
         }
     }

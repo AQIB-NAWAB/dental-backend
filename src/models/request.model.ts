@@ -6,9 +6,11 @@ interface TicketAttrs {
   createdBy: mongoose.Schema.Types.ObjectId;
   courseId: mongoose.Schema.Types.ObjectId;
   packageId: mongoose.Schema.Types.ObjectId;
+  pricePaid: number;
   paidThrough: string;
   cardNumber?: string;
   status: string;
+  
 }
 
 // Define the document interface for Mongoose
@@ -17,6 +19,7 @@ interface TicketDoc extends mongoose.Document {
   createdBy: mongoose.Schema.Types.ObjectId;
   courseId: mongoose.Schema.Types.ObjectId;
   packageId: mongoose.Schema.Types.ObjectId;
+  pricePaid: number;
   paidThrough: string;
   cardNumber?: string;
   status: string;
@@ -56,6 +59,10 @@ const ticketSchema = new mongoose.Schema(
     status: {
       type: String,
       default: "pending",
+    },
+    pricePaid: {
+      type: Number,
+      required: true,
     },
   },
   {

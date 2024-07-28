@@ -157,7 +157,25 @@ router.post(
 
 
 
+  // Load User 
 
+  router.get("/api/users/loaduser",currentUser,requireAuth,async(req,res)=>{
+    const user=await User.findById(req.currentUser?.id);
+    if(!user){
+        throw new BadRequestError("User not found");
+    }
+    const userJwt = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+      },
+      process.env.JWT_KEY!
+    );
+    req.session = {
+      jwt: userJwt,
+    };
+    res.status(201).send(user);
+  });
 
 
 export {router as userRoutes}

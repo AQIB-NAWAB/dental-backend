@@ -7,11 +7,12 @@ import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
 
 import { User } from "../models/user.mode";
-import { Password } from "../utils/password";
 import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
 import { Course } from "../models/courses.model";
 import { isAdmin } from "../middlewares/isAdmin";
+import mongoose from "mongoose";
+import { Package } from "../models/package.model";
 
 const router = express.Router();
 
@@ -34,10 +35,24 @@ router.get("/api/courses/mine",currentUser,requireAuth,async(req:Request,res:Res
     const user=await User.findById(req.currentUser!.id);
     let courses=[];
     for(let i=0;i<user!.courses.length;i++){
-        courses[i]=await Course.findById(user!.courses[i].courseId);
+        courses[i]=await Course.findById(user!.courses[i].courseId);   
     }
 
-    res.send(courses);
+    let allCourses=[];
+
+    for(let i=0;i<courses.length;i++){
+        const packageDetails=await Package.findById(user!.courses[i]!.packageId);
+        allCourses[i]={
+            courseDetails:courses[i],
+            packageDetails:packageDetails
+            
+        }
+    }
+
+
+
+
+    res.send(allCourses);
 
 });
 
@@ -64,6 +79,7 @@ router.post("/api/courses",[
     await course.save();
     res.status(201).send(course);
 });
+
 
 
 

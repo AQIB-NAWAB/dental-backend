@@ -1,7 +1,4 @@
-
-
 import mongoose from "mongoose";
-import { Password } from "../utils/password";
 
 interface PackageAttrs {
     packageName: string;

@@ -8,6 +8,7 @@ interface CourseAttrs {
     description: string;
     image: string;
     packages:Array<{packageId:mongoose.Schema.Types.ObjectId}>;
+
 }
 
 interface CourseModel extends mongoose.Model<CourseDoc> {

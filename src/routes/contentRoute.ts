@@ -77,3 +77,18 @@ router.post("/api/content",currentUser,requireAuth,isAdmin,[
 });
 
     
+// Delete content by id
+
+router.delete("/api/content/",currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
+    const {contentId}=req.body;
+    const content= await Content.findById(contentId);
+    if(!content){
+        throw new BadRequestError("Content not found");
+    }
+    await Content.findByIdAndDelete(contentId);
+    res.send(content);
+});
+
+
+
+export { router as contentRoutes };

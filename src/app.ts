@@ -14,6 +14,7 @@ import {userRoutes} from "./routes/userRoute"
 import {requestRoutes} from "./routes/requestRoute"
 import {courseRoutes} from "./routes/courseRoute"
 import {packageRoutes} from "./routes/packageRoute"
+import { contentRoutes } from './routes/contentRoute'
 
 // Error handler
 const app = express()
@@ -29,6 +30,7 @@ app.use(userRoutes)
 app.use(requestRoutes)
 app.use(courseRoutes)
 app.use(packageRoutes)
+app.use(contentRoutes)
 
 app.all("*",()=>{
   throw new NotFoundError()

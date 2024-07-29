@@ -159,6 +159,22 @@ router.put(
 );
 
 
+// get all tickets whose status is pending 
+
+router.get(
+  "/api/pendingtickets",
+  currentUser,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const tickets = await Ticket.find({ status: "pending" })
+      .populate("courseId")
+      .populate("packageId");
+    res.send(tickets);
+  }
+);
+
+
+
 
 // Get all  requeste by a user whose status is approve
 
@@ -177,6 +193,7 @@ router.get(
     res.send(tickets);
   }
 );
+
 
 
 

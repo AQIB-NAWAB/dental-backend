@@ -10,6 +10,7 @@ import { User } from "../models/user.mode";
 import { Password } from "../utils/password";
 import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
+import { sendEmail } from "../utils/sendEmail";
 
 const router = express.Router();
 
@@ -177,7 +178,123 @@ router.post(
     res.status(201).send(user);
   });
 
-  // get all users whoes role is user
+  
+
+  // contact us route
+
+  router.post("/api/contactus",[
+    body("name").not().isEmpty().withMessage("Name is required"),
+    body("email").isEmail().withMessage("Email must be valid"),
+    body("message").not().isEmpty().withMessage("Message is required")
+  ],validateRequest,async(req:Request,res:Response)=>{
+    const {name,email,message}=req.body;
+
+    const html=`
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>Request Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .header h1 {
+            color: #007BFF;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .content p {
+            margin: 0 0 10px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #888;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: white !important; 
+            background-color: #007BFF;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dental Strivers</h1>
+        </div>
+        <div class="content">
+            <h2>Contact US </h2>
+            <p>Dear ${name},</p>
+            <p>
+            Thanks for contacting us. We will get back to you as soon as possible.
+            </p>
+            <h3>Here is your message :</h3>
+            <p>${message}</p>
+
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <a href="https://yourwebsite.com/contact" class="btn">Contact Us</a>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Dental Strivers. All rights reserved.</p>
+            <p>123 Dental Street, Smile City, 45678</p>
+        </div>
+    </div>
+</body>
+</html>
+
+    `;
+
+
+    const options = {
+      email: email,
+      subject: "Contact Us",
+      html: html,
+    };
+
+
+    try {
+      sendEmail(options);
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestError("Email not sent");
+    }
+
+
+    res.status(201).json({message:"Email sent"});
+
+  })
+
+    
 
 
 export {router as userRoutes}

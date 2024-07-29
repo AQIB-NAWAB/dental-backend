@@ -41,13 +41,13 @@ router.post(
     const existingPackage = await Package.find({ packageName, courseId });
 
     if (existingPackage.length > 0) {
-      throw new BadRequestError("Package already exist for this course");
+      throw new BadRequestError("Package already exist for this course with same name");
     }
 
-    if (packageType === "mocks") {
+    if (packageType === "mock") {
       const { mocksPrices } = req.body;
       if (!mocksPrices) {
-        throw new BadRequestError("MocksPrices is required for mocks package");
+        throw new BadRequestError("MocksPrices is required for mocks package ");
       }
 
       const newPackage = await Package.build({
@@ -69,7 +69,7 @@ router.post(
       coures!.packages.push({ packageId: newPackage.id });
       await coures!.save();
 
-      res.status(201).send(newPackage);
+      return res.status(201).send(newPackage);
     } else {
       const newPackage = await Package.build({
         packageName,
@@ -87,7 +87,7 @@ router.post(
       coures!.packages.push({ packageId: newPackage.id });
       await coures!.save();
 
-      res.status(201).send(newPackage);
+      return res.status(201).send(newPackage);
     }
 
     res.status(201).send("Package created");
@@ -173,7 +173,7 @@ router.put(
       throw new BadRequestError("Package not found");
     }
 
-    if (packageType === "mocks") {
+    if (packageType === "mock") {
       const { mocksPrices } = req.body;
       if (!mocksPrices) {
         throw new BadRequestError("MocksPrices is required for mocks package");
@@ -191,7 +191,7 @@ router.put(
 
       await packageToUpdate.save();
 
-      res.status(201).send(packageToUpdate);
+      return res.status(201).send(packageToUpdate);
     } else {
       packageToUpdate.packageName = packageName;
       packageToUpdate.price = price;
@@ -202,7 +202,7 @@ router.put(
 
       await packageToUpdate.save();
 
-      res.status(201).send(packageToUpdate);
+      return res.status(201).send(packageToUpdate);
     }
   }
 );

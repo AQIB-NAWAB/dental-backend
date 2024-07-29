@@ -41,14 +41,17 @@ const ticketSchema = new mongoose.Schema(
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: 'User', 
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: 'Course',
     },
     packageId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
+      ref: 'Package',
     },
     paidThrough: {
       type: String,

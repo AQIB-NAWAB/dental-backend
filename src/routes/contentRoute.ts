@@ -11,7 +11,6 @@ import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
 import { Course } from "../models/courses.model";
 import { isAdmin } from "../middlewares/isAdmin";
-import mongoose from "mongoose";
 import { Content } from "../models/content.model";
 import { Package } from "../models/package.model";
 import { Ticket } from "../models/request.model";
@@ -31,6 +30,21 @@ router.get("/api/content",currentUser,requireAuth,async(req:Request,res:Response
     if(!targetedPackage){
         throw new BadRequestError("Package not found");
     }
+    const user=await User.findById(req.currentUser!.id);
+
+    if(user?.role=="user"){
+    // check that this user has purchased the courese or not with couresid and packageid
+
+        const ticket=await Ticket.findOne({createdBy:req.currentUser!.id,courseId,packageId,status:"approve"});
+        if(!ticket){
+            throw new BadRequestError("You have not purchased this course");
+        }
+
+    }
+
+
+
+    
 
     if(targetedPackage.packageType=="mocks" || targetedPackage.packageType=="mock"){
         const user=await User.findById(req.currentUser!.id);
@@ -78,7 +92,7 @@ router.post("/api/content",currentUser,requireAuth,[
     }
 
 
-    if(contentType==="mock" && packageName=="Mocks Only"){
+    if(contentType==="mock" || contentType==="mocks" ){
         const {mockLink,topic}=req.body;
         const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,mockLink,lectureNo,meetLink:"",pdfLink:""});  
         await content.save();

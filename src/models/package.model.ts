@@ -7,7 +7,7 @@ interface PackageAttrs {
     price: number;
     courseId: mongoose.Schema.Types.ObjectId;
     packageType: string;
-    mocksPrices: Array<{quatity:number;price:number}>;
+    mocksPrices: Array<{quantity:number;price:number}>;
 
 
 }
@@ -23,7 +23,7 @@ interface PackageDoc extends mongoose.Document {
     price: number;
     courseId: mongoose.Schema.Types.ObjectId;
     packageType: string;
-    mocksPrices: Array<{quatity:number;price:number}>;
+    mocksPrices: Array<{quantity:number;price:number}>;
 }
 
 const packageSchema = new mongoose.Schema({
@@ -52,7 +52,7 @@ const packageSchema = new mongoose.Schema({
         required: true,
     },
     mocksPrices: [{
-        quatity: {
+        quantity: {
             type: Number,
             required: true,
         },

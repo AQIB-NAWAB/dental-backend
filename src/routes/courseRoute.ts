@@ -13,6 +13,7 @@ import { Course } from "../models/courses.model";
 import { isAdmin } from "../middlewares/isAdmin";
 import mongoose from "mongoose";
 import { Package } from "../models/package.model";
+import { Ticket } from "../models/request.model";
 
 const router = express.Router();
 
@@ -79,6 +80,74 @@ router.post("/api/courses",[
     await course.save();
     res.status(201).send(course);
 });
+
+
+// get all users who have purchased a course 
+
+router.get("/api/active-users",currentUser,requireAuth,async(req:Request,res:Response)=>{
+
+
+const activeCourses=await Ticket.find({status:"approve"}).populate('createdBy').populate('packageId').populate('courseId');
+
+    res.send(activeCourses);
+
+})
+
+
+// Delete a course by admin for a user and delete the ticket of that course 
+
+router.delete("/api/active-users",
+    [
+        body("userId").not().isEmpty().withMessage("userId is required"),
+        body("courseId").not().isEmpty().withMessage("courseId is required"),
+        body("packageId").not().isEmpty().withMessage("packageId is required")
+    ],
+    validateRequest
+    ,   
+    currentUser,requireAuth,async(req:Request,res:Response)=>{
+
+const {userId,courseId,packageId}=req.body;
+
+const user=await User.findById(userId);
+
+if(!user){
+    throw new BadRequestError("User not found");
+}
+
+
+const ticket=await Ticket.findOne({createdBy:userId,courseId,packageId,status:"approve"});
+
+
+if(!ticket){
+    throw new BadRequestError("Ticket not found");
+}
+
+
+await Ticket.findByIdAndDelete(ticket.id);
+
+
+user.courses=user.courses.filter((course)=>{
+    return course.courseId.toString()!==courseId.toString() && course.packageId.toString()!==packageId.toString();
+})
+
+
+await user.save();
+
+
+res.send({message:"Course deleted successfully"});
+
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 

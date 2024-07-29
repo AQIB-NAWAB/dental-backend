@@ -177,5 +177,7 @@ router.post(
     res.status(201).send(user);
   });
 
+  // get all users whoes role is user
+
 
 export {router as userRoutes}

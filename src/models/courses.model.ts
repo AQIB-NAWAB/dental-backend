@@ -55,7 +55,7 @@ const courseSchema = new mongoose.Schema({
 
 courseSchema.statics.build = (attrs: CourseAttrs) => {
     return new Course(attrs);
-};
+};  
 
 
 const Course = mongoose.model<CourseDoc, CourseModel>('Course', courseSchema);

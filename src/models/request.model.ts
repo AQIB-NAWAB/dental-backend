@@ -10,7 +10,7 @@ interface TicketAttrs {
   paidThrough: string;
   cardNumber?: string;
   status: string;
-  
+  mocksPurcahsed?:number;
 }
 
 // Define the document interface for Mongoose
@@ -23,6 +23,7 @@ interface TicketDoc extends mongoose.Document {
   paidThrough: string;
   cardNumber?: string;
   status: string;
+  mocksPurcahsed:number;
 }
 
 // Define the model interface for Mongoose
@@ -64,8 +65,12 @@ const ticketSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    mocksPurcahsed:{
+      type:Number,
+      required:true
+    }
   },
-  {
+{
     toJSON: {
       transform(doc, ret) {
         ret.id = ret._id;

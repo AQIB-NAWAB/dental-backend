@@ -1,7 +1,6 @@
-
 import express, { Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { body} from "express-validator";
+import { body } from "express-validator";
 
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
@@ -11,12 +10,11 @@ import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
 import { Ticket } from "../models/request.model";
 import { isAdmin } from "../middlewares/isAdmin";
-import  {sendEmail}  from "../utils/sendEmail";
+import { sendEmail } from "../utils/sendEmail";
 import fs from "fs";
 import path from "path";
 
 const router = express.Router();
-
 
 // Create a new ticket by a user to request a course with a package
 
@@ -26,61 +24,64 @@ router.post(
     body("email").isEmail().withMessage("Email must be valid"),
     body("courseId").not().isEmpty().withMessage("Course ID is required"),
     body("packageId").not().isEmpty().withMessage("Package ID is required"),
-    body("paidThrough").not().isEmpty().withMessage("Payment method is required"),
+    body("paidThrough")
+      .not()
+      .isEmpty()
+      .withMessage("Payment method is required"),
     body("pricePaid").not().isEmpty().withMessage("Price is required"),
   ],
   validateRequest,
   currentUser,
   requireAuth,
-    async (req: Request, res: Response) => {
-        const { email, courseId, packageId, paidThrough, cardNumber,pricePaid } = req.body;
-        
-        const user= await User.findById(req.currentUser!.id);
-        
-        // Check if the user has already requested the course with the package
+  async (req: Request, res: Response) => {
+    const { email, courseId, packageId, paidThrough, cardNumber, pricePaid,mocksPurcahsed } =
+      req.body;
 
-        const existingTicket = await Ticket.findOne({ email, courseId, packageId });
+    const user = await User.findById(req.currentUser!.id);
 
-        if (existingTicket) {
-            throw new BadRequestError("You have already requested this course with the package");
-        }
+    // Check if the user has already requested the course with the package
 
-        
+    const existingTicket = await Ticket.findOne({ email, courseId, packageId });
 
-        
-        const ticket = Ticket.build({
-            email,
-            createdBy: user!.id,
-            courseId,
-            packageId,
-            paidThrough,
-            cardNumber,
-            status: "pending",
-            pricePaid
-        });
-
-        await ticket.save();
-        
-        const options = {
-          email: email,
-          subject: "Course Requested",
-          html: fs.readFileSync(path.join(__dirname, "../mailsTemplate/requestmail.html"), "utf-8"),
-        };
-
-        try{
-
-          sendEmail(options);
-        }catch(err){
-          console.log(err);
-          throw new BadRequestError("Email not sent");
-        }
-
-        res.status(201).send(ticket);
-
+    if (existingTicket) {
+      throw new BadRequestError(
+        "You have already requested this course with the package"
+      );
     }
+
+    const ticket = Ticket.build({
+      email,
+      createdBy: user!.id,
+      courseId,
+      packageId,
+      paidThrough,
+      cardNumber,
+      status: "pending",
+      pricePaid,
+      mocksPurcahsed:mocksPurcahsed?mocksPurcahsed:0
+    });
+
+    await ticket.save();
+
+    const options = {
+      email: email,
+      subject: "Course Requested",
+      html: fs.readFileSync(
+        path.join(__dirname, "../mailsTemplate/requestmail.html"),
+        "utf-8"
+      ),
+    };
+
+    try {
+      sendEmail(options);
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestError("Email not sent");
+    }
+
+    res.status(201).send(ticket);
+  }
 );
-
-
 
 // Get all tickets by admin
 
@@ -89,15 +90,14 @@ router.get(
   currentUser,
   requireAuth,
   async (req: Request, res: Response) => {
-    const tickets = await Ticket.find({status:"pending"}).populate('courseId').populate('packageId');
+    const tickets = await Ticket.find({ status: "pending" })
+      .populate("courseId")
+      .populate("packageId");
     res.send(tickets);
   }
 );
 
-
-
 // Delete a ticket by admin with ticket ID
-
 
 router.delete(
   "/api/tickets/:id",
@@ -116,15 +116,12 @@ router.delete(
   }
 );
 
-
 // Update the status of a ticket by admin with ticket ID
 
 router.put(
   "/api/tickets/:id",
-    [
-        body("status").not().isEmpty().withMessage("Status is required"),
-    ],
-    validateRequest,
+  [body("status").not().isEmpty().withMessage("Status is required")],
+  validateRequest,
   currentUser,
   requireAuth,
   async (req: Request, res: Response) => {
@@ -148,19 +145,38 @@ router.put(
       throw new BadRequestError("User not found");
     }
 
-
     // Assign the course to the user
 
-    user.courses.push({courseId: ticket.courseId, packageId: ticket.packageId});
+    user.courses.push({
+      courseId: ticket.courseId,
+      packageId: ticket.packageId,
+    });
 
     await user.save();
-
-
 
     res.send({ message: "Ticket updated successfully" });
   }
 );
 
+
+
+// Get all  requeste by a user whose status is approve
+
+router.get(
+  "/api/mytickets",
+  currentUser,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const tickets = await Ticket.find({
+      createdBy: req.currentUser!.id,
+      status: "approve",
+    })
+      .populate("courseId")
+      .populate("packageId");
+
+    res.send(tickets);
+  }
+);
 
 
 

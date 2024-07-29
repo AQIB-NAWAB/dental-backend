@@ -26,9 +26,6 @@ router.get("/api/courses",currentUser,requireAuth,async(req:Request,res:Response
 }
 );
 
-
-
-
 // Get all courses of a user from array of courses
   
 router.get("/api/courses/mine",currentUser,requireAuth,async(req:Request,res:Response)=>{

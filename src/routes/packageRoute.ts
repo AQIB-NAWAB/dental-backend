@@ -58,7 +58,7 @@ router.post(
         end,
         packageType,
         mocksPrices: mocksPrices.map((mockPrice: any) => ({
-          quatity: mockPrice.quatity,
+          quantity: mockPrice.quantity,
           price: mockPrice.price,
         })),
       });

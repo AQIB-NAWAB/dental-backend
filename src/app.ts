@@ -5,6 +5,9 @@ import mongoose from 'mongoose'
 import cookieSession from 'cookie-session'
 import { NotFoundError } from './errors/not-found-error'
 import { errorHandler } from './middlewares/error-handler'
+import cors from 'cors'
+
+
 
 
 
@@ -25,6 +28,13 @@ app.use(json())
 app.use(cookieSession({
   signed: false,
 }))
+app.use(
+  cors({
+    origin: ["http://localhost:5173",],
+    methods: ["POST", "GET", "PUT", "DELETE"],
+    credentials: true,
+  })
+);
 
 app.use(userRoutes)
 app.use(requestRoutes)

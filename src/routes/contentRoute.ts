@@ -14,6 +14,7 @@ import { isAdmin } from "../middlewares/isAdmin";
 import mongoose from "mongoose";
 import { Content } from "../models/content.model";
 import { Package } from "../models/package.model";
+import { Ticket } from "../models/request.model";
 
 const router = express.Router();
 
@@ -22,13 +23,35 @@ const router = express.Router();
 // get all content of a course according to pachage id and coures id
 router.get("/api/content",currentUser,requireAuth,async(req:Request,res:Response)=>{
     const {courseId,packageId}=req.body;
-    const content= await Content.find({courseId:courseId,packageId:packageId});
-    res.send(content);
+    const coures=await Course.findById(courseId);
+    if(!coures){
+        throw new BadRequestError("Course not found");
+    }
+    const targetedPackage=await Package.findById(packageId);
+    if(!targetedPackage){
+        throw new BadRequestError("Package not found");
+    }
+
+    if(targetedPackage.packageType=="mocks" || targetedPackage.packageType=="mock"){
+        const user=await User.findById(req.currentUser!.id);
+
+        const ticket=await Ticket.findOne({email:user?.email,courseId,packageId});
+
+        const limit=ticket?.mocksPurcahsed || 0;
+
+        
+        const content=await Content.find({courseId,packageId,contentType:"mock"}).limit(limit);
+        res.send(content);
+    }else{
+        const content=await Content.find({courseId,packageId});
+        res.send(content);
+    }
+
 });
 
 // add content to speicific course and package
 
-router.post("/api/content",currentUser,requireAuth,isAdmin,[
+router.post("/api/content",currentUser,requireAuth,[
     body("courseId").not().isEmpty().withMessage("courseId is required"),
     body("packageId").not().isEmpty().withMessage("packageId is required"),
     body("packageName").not().isEmpty().withMessage("packageName is required"),
@@ -48,31 +71,33 @@ router.post("/api/content",currentUser,requireAuth,isAdmin,[
         throw new BadRequestError("Course not found");
     }
 
-    const targetedPackage=await Package.findOne({courseId:courseId,packageId:packageId});
+    const targetedPackage=await Package.findById(packageId);
 
     if(!targetedPackage){
         throw new BadRequestError("Package not found");
     }
 
 
-    if(contentType==="mock"){
+    if(contentType==="mock" && packageName=="Mocks Only"){
         const {mockLink,topic}=req.body;
         const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,mockLink,lectureNo,meetLink:"",pdfLink:""});  
         await content.save();
-        res.status(201).send(content);
+        return res.status(201).send(content);
     }else if(contentType==="zoom"){
         const {meetLink,topic}=req.body;
         const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,meetLink,lectureNo,mockLink:"",pdfLink:""});  
         await content.save();
-        res.status(201).send(content);
+        return res.status(201).send(content);
     }else if(contentType==="pdf"){
         const {pdfLink,topic}=req.body;
         const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,pdfLink,lectureNo,mockLink:"",meetLink:""});  
         await content.save();
-        res.status(201).send(content);
+        return res.status(201).send(content);
     }else{
         throw new BadRequestError("Invalid content type");
     }
+
+    res.send({message:"Content added successfully"});
 
 });
 
@@ -88,7 +113,6 @@ router.delete("/api/content/",currentUser,requireAuth,isAdmin,async(req:Request,
     await Content.findByIdAndDelete(contentId);
     res.send(content);
 });
-
 
 
 export { router as contentRoutes };

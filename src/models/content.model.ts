@@ -52,7 +52,6 @@ const contentSchema = new mongoose.Schema({
     },
     mockLink: {
         type: String,
-        required: true
     },
     weekNo: {
         type: Number,
@@ -60,15 +59,12 @@ const contentSchema = new mongoose.Schema({
     },
     topic: {
         type: String,
-        required: true
     },
     meetLink: {
         type: String,
-        required: true
     },
     pdfLink: {
         type: String,
-        required: true
     },
     lectureNo: {
         type: Number,

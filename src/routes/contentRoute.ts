@@ -1,11 +1,9 @@
 import express, { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { body, validationResult } from "express-validator";
-
 import { RequestValidationError } from "../errors/request-validation-error";
 import { BadRequestError } from "../errors/bad-request-error";
 import { validateRequest } from "../middlewares/validate-request";
-
 import { User } from "../models/user.mode";
 import { currentUser } from "../middlewares/current-user";
 import { requireAuth } from "../middlewares/require-auth";
@@ -55,11 +53,12 @@ router.get("/api/content",currentUser,requireAuth,async(req:Request,res:Response
 
         
         const content=await Content.find({courseId,packageId,contentType:"mock"}).limit(limit);
-        res.send(content);
+        return res.send(content);
     }else{
         const content=await Content.find({courseId,packageId});
-        res.send(content);
+        return res.send(content);
     }
+
 
 });
 

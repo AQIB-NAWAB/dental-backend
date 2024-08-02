@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import jwt from "jsonwebtoken";
 import { body } from "express-validator";
 
 import { BadRequestError } from "../errors/bad-request-error";
@@ -34,8 +33,15 @@ router.post(
   currentUser,
   requireAuth,
   async (req: Request, res: Response) => {
-    const { email, courseId, packageId, paidThrough, cardNumber, pricePaid,mocksPurcahsed } =
-      req.body;
+    const {
+      email,
+      courseId,
+      packageId,
+      paidThrough,
+      receiptLink,
+      pricePaid,
+      mocksPurcahsed,
+    } = req.body;
 
     const user = await User.findById(req.currentUser!.id);
 
@@ -55,10 +61,10 @@ router.post(
       courseId,
       packageId,
       paidThrough,
-      cardNumber,
+      receiptLink,
       status: "pending",
       pricePaid,
-      mocksPurcahsed:mocksPurcahsed?mocksPurcahsed:0
+      mocksPurcahsed: mocksPurcahsed ? mocksPurcahsed : 0,
     });
 
     await ticket.save();
@@ -90,7 +96,7 @@ router.get(
   currentUser,
   requireAuth,
   async (req: Request, res: Response) => {
-    const tickets = await Ticket.find({ status: "pending" })
+    const tickets = await Ticket.find({ status: "pending" }).populate('createdBy')
       .populate("courseId")
       .populate("packageId");
     res.send(tickets);
@@ -158,8 +164,7 @@ router.put(
   }
 );
 
-
-// get all tickets whose status is pending 
+// get all tickets whose status is pending
 
 router.get(
   "/api/pendingtickets",
@@ -172,7 +177,6 @@ router.get(
     res.send(tickets);
   }
 );
-
 
 // Get all  requeste by a user whose status is approve
 
@@ -191,14 +195,5 @@ router.get(
     res.send(tickets);
   }
 );
-
-
-
-
-
-
-
-
-
 
 export { router as requestRoutes };

@@ -8,7 +8,7 @@ interface TicketAttrs {
   packageId: mongoose.Schema.Types.ObjectId;
   pricePaid: number;
   paidThrough: string;
-  cardNumber?: string;
+  receiptLink?: string;
   status: string;
   mocksPurcahsed?:number;
 }
@@ -21,7 +21,7 @@ interface TicketDoc extends mongoose.Document {
   packageId: mongoose.Schema.Types.ObjectId;
   pricePaid: number;
   paidThrough: string;
-  cardNumber?: string;
+  receiptLink?: string;
   status: string;
   mocksPurcahsed:number;
 }
@@ -57,7 +57,7 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    cardNumber: {
+    receiptLink: {
       type: String,
     },
     status: {

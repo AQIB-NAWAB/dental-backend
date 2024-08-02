@@ -40,10 +40,6 @@ router.get("/api/content",currentUser,requireAuth,async(req:Request,res:Response
 
     }
 
-
-
-    
-
     if(targetedPackage.packageType=="mocks" || targetedPackage.packageType=="mock"){
         const user=await User.findById(req.currentUser!.id);
 

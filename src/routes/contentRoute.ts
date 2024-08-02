@@ -20,8 +20,8 @@ const router = express.Router();
 
 
 // get all content of a course according to pachage id and coures id
-router.get("/api/content",currentUser,requireAuth,async(req:Request,res:Response)=>{
-    const {courseId,packageId}=req.body;
+router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res:Response)=>{
+    const {courseId,packageId}=req.params;
     const coures=await Course.findById(courseId);
     if(!coures){
         throw new BadRequestError("Course not found");

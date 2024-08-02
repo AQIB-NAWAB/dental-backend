@@ -21,7 +21,7 @@ const router = express.Router();
 
 // Get all courses 
 router.get("/api/courses",currentUser,requireAuth,async(req:Request,res:Response)=>{
-    const courses= await Course.find({});
+    const courses = await Course.find({}).populate('packages.packageId');
 
     res.send(courses);
 }
@@ -114,15 +114,12 @@ router.delete("/api/active-users",
     currentUser,requireAuth,async(req:Request,res:Response)=>{
 
 const {userId,courseId,packageId}=req.body;
-console.log(userId,courseId,packageId);
 
 const user=await User.findById(userId);
-console.log(user);
 
 if(!user){
     throw new BadRequestError("User not found");
 }
-
 
 const ticket=await Ticket.findOne({createdBy:userId,courseId,packageId,status:"approve"});
 

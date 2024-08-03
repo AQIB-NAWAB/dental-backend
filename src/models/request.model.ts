@@ -69,7 +69,6 @@ const ticketSchema = new mongoose.Schema(
     },
     mocksPurcahsed:{
       type:Number,
-      required:true
     }
   },
 {

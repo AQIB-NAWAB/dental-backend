@@ -27,10 +27,11 @@ app.use(cookieSession({
   secure: true,
   sameSite: 'none',
   maxAge: 24 * 60 * 60 * 1000,
+
 }));
 app.use(
   cors({
-    origin: 'https://dental-strivers.vercel.app',
+    origin: ['https://dental-strivers.vercel.app','http://localhost:5173'],
     methods: ['POST', 'GET', 'PUT', 'DELETE'],
     credentials: true,
   })

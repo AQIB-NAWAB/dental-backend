@@ -34,20 +34,22 @@ router.post(
   requireAuth,
   async (req: Request, res: Response) => {
     const {
-      email,
       courseId,
       packageId,
       paidThrough,
-      receiptLink,
       pricePaid,
       mocksPurcahsed,
     } = req.body;
 
     const user = await User.findById(req.currentUser!.id);
 
+    if (!user) {
+      throw new BadRequestError("User not found");
+    }
+
     // Check if the user has already requested the course with the package
 
-    const existingTicket = await Ticket.findOne({ email, courseId, packageId });
+    const existingTicket = await Ticket.findOne({ createdBy:user.id, courseId, packageId });
 
     if (existingTicket) {
       throw new BadRequestError(
@@ -55,17 +57,53 @@ router.post(
       );
     }
 
-    const ticket = Ticket.build({
-      email,
-      createdBy: user!.id,
-      courseId,
-      packageId,
-      paidThrough,
-      receiptLink,
-      status: "pending",
-      pricePaid,
-      mocksPurcahsed: mocksPurcahsed ? mocksPurcahsed : 0,
-    });
+
+    if(pricePaid<=0){
+      throw new BadRequestError("Price must be greater than 0");
+    }
+
+    if(paidThrough=="square"){
+      const {receiptLink}=req.body;
+      if(!receiptLink){
+        throw new BadRequestError("Receipt link is required");
+      }
+
+      const ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, receiptLink, status: "pending", pricePaid });
+    
+      await ticket.save();
+
+
+      const options = {
+        email: user.email,
+        subject: "Course Requested",
+        html: fs.readFileSync(
+          path.join(__dirname, "../mailsTemplate/requestmail.html"),
+          "utf-8"
+        ),
+      };
+  
+  
+      try {
+        sendEmail(options);
+      } catch (err) {
+        console.log(err);
+        throw new BadRequestError("Email not sent");
+      }
+  
+    return  res.status(201).send(ticket);
+
+
+    }else{
+      const email=req.body.email;
+      if(mocksPurcahsed && mocksPurcahsed<=0){
+        throw new BadRequestError("Mocks purchased must be greater than 0");
+      }
+
+      const ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, status: "pending", pricePaid, mocksPurcahsed,email });
+
+
+
+
 
     await ticket.save();
 
@@ -78,6 +116,7 @@ router.post(
       ),
     };
 
+
     try {
       sendEmail(options);
     } catch (err) {
@@ -86,6 +125,7 @@ router.post(
     }
 
     res.status(201).send(ticket);
+    }
   }
 );
 

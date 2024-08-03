@@ -36,7 +36,6 @@ const ticketSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      // required: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

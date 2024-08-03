@@ -25,7 +25,7 @@ app.use(json());
 app.use(cookieSession({
   signed: false,
   secure: true,
-  sameSite: 'none',
+  sameSite: 'lax',
   maxAge: 24 * 60 * 60 * 1000,
 
 }));

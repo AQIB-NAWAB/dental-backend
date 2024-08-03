@@ -101,10 +101,10 @@ router.post(
 // Sign Out
 
 router.post('/api/users/signout', (req, res) => {
-  req.session = {
-    jwt: null
-  };
-  res.status(200).send({})
+  req.session = null
+
+  res.send({})
+
 })
 
 // get the current user

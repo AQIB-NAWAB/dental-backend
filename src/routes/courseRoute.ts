@@ -57,8 +57,6 @@ router.get(
 
 router.get(
   "/api/courses/:id",
-  currentUser,
-  requireAuth,
   async (req: Request, res: Response) => {
     const course = await Course.findById(req.params.id).populate(
       "packages.packageId"

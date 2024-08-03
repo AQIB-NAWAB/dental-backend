@@ -19,7 +19,6 @@ import { paymentRoute } from './routes/paymentRoute';
 // Error handler
 const app = express();
 
-app.set('trust proxy', true);
 
 app.use(json());
 app.use(cookieSession({

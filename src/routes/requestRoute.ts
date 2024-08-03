@@ -20,7 +20,6 @@ const router = express.Router();
 router.post(
   "/api/tickets",
   [
-    body("email").isEmail().withMessage("Email must be valid"),
     body("courseId").not().isEmpty().withMessage("Course ID is required"),
     body("packageId").not().isEmpty().withMessage("Package ID is required"),
     body("paidThrough")

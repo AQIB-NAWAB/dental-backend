@@ -20,7 +20,7 @@ const router = express.Router();
 
 
 // Get all courses 
-router.get("/api/courses",currentUser,requireAuth,async(req:Request,res:Response)=>{
+router.get("/api/courses",async(req:Request,res:Response)=>{
     const courses = await Course.find({}).populate('packages.packageId');
 
     res.send(courses);

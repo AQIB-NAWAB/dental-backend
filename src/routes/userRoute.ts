@@ -100,15 +100,10 @@ router.post(
 
 // Sign Out
 
-router.post(
-  "/api/users/signout",
-  currentUser,
-  requireAuth,
-  async (req, res) => {
-    req.session = null;
-    res.status(200).send({});
-  }
-);
+router.post('/api/users/signout', (req, res) => {
+  req.session = null
+  res.status(200).send({})
+})
 
 // get the current user
 router.get(

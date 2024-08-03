@@ -12,6 +12,7 @@ import { isAdmin } from "../middlewares/isAdmin";
 import { sendEmail } from "../utils/sendEmail";
 import fs from "fs";
 import path from "path";
+import { Package } from "../models/package.model";
 
 const router = express.Router();
 
@@ -37,7 +38,6 @@ router.post(
       packageId,
       paidThrough,
       pricePaid,
-      mocksPurcahsed,
     } = req.body;
 
     const user = await User.findById(req.currentUser!.id);
@@ -56,6 +56,7 @@ router.post(
       );
     }
 
+    const packageDetails = await Package.findById(packageId);
 
     if(pricePaid<=0){
       throw new BadRequestError("Price must be greater than 0");
@@ -67,9 +68,20 @@ router.post(
         throw new BadRequestError("Receipt link is required");
       }
 
-      const ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, receiptLink, status: "pending", pricePaid });
+      let ticket;
+
+      if(packageDetails!.packageType=="mock"){
+        const mocksPurchased=req.body.mocksPurchased;
+        ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, receiptLink, status: "pending", pricePaid,mocksPurchased });
+        await ticket.save();
+
+      }else{
+        ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, receiptLink, status: "pending", pricePaid });
+        await ticket.save();
+      }
+
+
     
-      await ticket.save();
 
 
       const options = {
@@ -94,11 +106,12 @@ router.post(
 
     }else{
       const email=req.body.email;
-      if(mocksPurcahsed && mocksPurcahsed<=0){
+      const mocksPurchased=req.body.mocksPurchased; 
+      if(mocksPurchased && mocksPurchased<=0){
         throw new BadRequestError("Mocks purchased must be greater than 0");
       }
 
-      const ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, status: "pending", pricePaid, mocksPurcahsed,email });
+      const ticket = Ticket.build({ createdBy: user.id, courseId, packageId, paidThrough, status: "pending", pricePaid, mocksPurchased,email });
 
 
 

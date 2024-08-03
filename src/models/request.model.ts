@@ -10,7 +10,7 @@ interface TicketAttrs {
   paidThrough: string;
   receiptLink?: string;
   status: string;
-  mocksPurcahsed?:number;
+  mocksPurchased?:number;
 }
 
 // Define the document interface for Mongoose
@@ -23,7 +23,7 @@ interface TicketDoc extends mongoose.Document {
   paidThrough: string;
   receiptLink?: string;
   status: string;
-  mocksPurcahsed:number;
+  mocksPurchased:number;
 }
 
 // Define the model interface for Mongoose
@@ -67,7 +67,7 @@ const ticketSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    mocksPurcahsed:{
+    mocksPurchased:{
       type:Number,
     }
   },

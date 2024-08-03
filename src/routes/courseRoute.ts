@@ -126,9 +126,19 @@ if(!ticket){
 await Ticket.findByIdAndDelete(ticket.id);
 
 
-user.courses=user.courses.filter((course)=>{
-    return course.courseId.toString()!==courseId.toString() && course.packageId.toString()!==packageId.toString();
-})
+// remove course from user courses array using the course id and the package id
+
+let courses=[];
+
+for(let i=0;i<user!.courses.length;i++){
+    if(user!.courses[i].courseId!=courseId){
+        courses.push(user!.courses[i]);
+    }
+}
+
+user!.courses=courses;
+
+
 
 
 await user.save();

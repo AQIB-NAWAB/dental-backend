@@ -10,8 +10,8 @@ import { Request, Response } from "express";
 
 
 const { paymentsApi } = new Client({
-  accessToken: process.env.SQUARE_ACCESS_TOKEN,
-  environment: process.env.SQUARE_ENVIORMENT as any
+  accessToken: 'EAAAlyvuKkagCL5JrFG0hIxYiko6mqyzY-PX-DjBk_04nH0TlEzBAS3kYXblrud8',
+  environment: "sandbox" as any
 });
 
 const router = express.Router();
@@ -42,6 +42,7 @@ const {amount,nonce}=req.body;
     ));
     res.json(responseData);
   } catch (error:any) {
+    console.log(error)
     res.status(500).json({ errors: error.errors });
   }
 });

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 // Define the attributes for the Ticket
 interface TicketAttrs {
-  email: string;
+  email?: string;
   createdBy: mongoose.Schema.Types.ObjectId;
   courseId: mongoose.Schema.Types.ObjectId;
   packageId: mongoose.Schema.Types.ObjectId;
@@ -15,7 +15,7 @@ interface TicketAttrs {
 
 // Define the document interface for Mongoose
 interface TicketDoc extends mongoose.Document {
-  email: string;
+  email?: string;
   createdBy: mongoose.Schema.Types.ObjectId;
   courseId: mongoose.Schema.Types.ObjectId;
   packageId: mongoose.Schema.Types.ObjectId;
@@ -36,7 +36,7 @@ const ticketSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: true,
+      // required: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

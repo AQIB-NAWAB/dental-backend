@@ -14,6 +14,7 @@ import { requestRoutes } from './routes/requestRoute';
 import { courseRoutes } from './routes/courseRoute';
 import { packageRoutes } from './routes/packageRoute';
 import { contentRoutes } from './routes/contentRoute';
+import { paymentRoute } from './routes/paymentRoute';
 
 // Error handler
 const app = express();
@@ -48,6 +49,7 @@ app.use(requestRoutes);
 app.use(courseRoutes);
 app.use(packageRoutes);
 app.use(contentRoutes);
+app.use(paymentRoute);
 
 app.all('*', () => {
   throw new NotFoundError();

@@ -45,10 +45,11 @@ router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res
 
         const ticket=await Ticket.findOne({email:user?.email,courseId,packageId});
 
-        const limit=ticket?.mocksPurcahsed || 0;
+        const limit=ticket?.mocksPurcahsed || 2;
 
         
         const content=await Content.find({courseId,packageId,contentType:"mock"}).limit(limit);
+        console.log(content)
         return res.send(content);
     }else{
         const content=await Content.find({courseId,packageId});

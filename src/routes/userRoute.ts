@@ -100,70 +100,76 @@ router.post(
 
 // Sign Out
 
-router.post("/api/users/signout", (req, res) => {
-  req.session = null;
-  res.send({});
-});
+router.post(
+  "/api/users/signout",
+  currentUser,
+  requireAuth,
+  async (req, res) => {
+    req.session = null;
+    res.status(200).send({});
+  }
+);
 
+// get the current user
+router.get(
+  "/api/users/current-user",
+  currentUser,
+  requireAuth,
+  async (req, res) => {
+    const user = await User.findById(req?.currentUser?.id);
 
-// get the current user 
-router.get("/api/users/current-user",currentUser,requireAuth,async(req,res)=>{
-    const user=await User.findById(req?.currentUser?.id);
-
-    res.send(user)
-})
-
-
+    res.send(user);
+  }
+);
 
 // Update Password
 
-
 router.post(
-    "/api/users/change-password",
-    [
-      body("oldPassword").not().isEmpty().withMessage("Old password is required"),
-      body("newPassword")
-        .trim()
-        .isLength({ min: 4, max: 20 })
-        .withMessage("New password must be between 4 and 20 characters"),
-    ],
-    validateRequest,
-    currentUser,
-    requireAuth,
-    async (req: Request, res: Response) => {
-      const { oldPassword, newPassword, confirmPassword } = req.body;
-      const user = await User.findById(req.currentUser!.id);
-  
-      if (!user) {
-        throw new BadRequestError("User not found");
-      }
-  
-      const passwordsMatch = await Password.compare(user.password, oldPassword);
-      if (!passwordsMatch) {
-        throw new BadRequestError("Old password is incorrect");
-      }
-  
-      if (newPassword !== confirmPassword) {
-        throw new BadRequestError("New passwords do not match");
-      }
-  
-      user.password = newPassword;
-      await user.save();
-  
-      res.status(200).send({ message: "Password updated successfully" });
+  "/api/users/change-password",
+  [
+    body("oldPassword").not().isEmpty().withMessage("Old password is required"),
+    body("newPassword")
+      .trim()
+      .isLength({ min: 4, max: 20 })
+      .withMessage("New password must be between 4 and 20 characters"),
+  ],
+  validateRequest,
+  currentUser,
+  requireAuth,
+  async (req: Request, res: Response) => {
+    const { oldPassword, newPassword, confirmPassword } = req.body;
+    const user = await User.findById(req.currentUser!.id);
+
+    if (!user) {
+      throw new BadRequestError("User not found");
     }
-  );
-  
-  
 
+    const passwordsMatch = await Password.compare(user.password, oldPassword);
+    if (!passwordsMatch) {
+      throw new BadRequestError("Old password is incorrect");
+    }
 
+    if (newPassword !== confirmPassword) {
+      throw new BadRequestError("New passwords do not match");
+    }
 
-  // Load User 
+    user.password = newPassword;
+    await user.save();
 
-  router.get("/api/users/loaduser",currentUser,requireAuth,async(req,res)=>{
-    const user=await User.findById(req.currentUser?.id);
-    if(!user){
-        throw new BadRequestError("User not found");
+    res.status(200).send({ message: "Password updated successfully" });
+  }
+);
+
+// Load User
+
+router.get(
+  "/api/users/loaduser",
+  currentUser,
+  requireAuth,
+  async (req, res) => {
+    const user = await User.findById(req.currentUser?.id);
+    if (!user) {
+      throw new BadRequestError("User not found");
     }
     const userJwt = jwt.sign(
       {
@@ -176,20 +182,23 @@ router.post(
       jwt: userJwt,
     };
     res.status(201).send(user);
-  });
+  }
+);
 
-  
+// contact us route
 
-  // contact us route
-
-  router.post("/api/contactus",[
+router.post(
+  "/api/contactus",
+  [
     body("name").not().isEmpty().withMessage("Name is required"),
     body("email").isEmail().withMessage("Email must be valid"),
-    body("message").not().isEmpty().withMessage("Message is required")
-  ],validateRequest,async(req:Request,res:Response)=>{
-    const {name,email,message}=req.body;
+    body("message").not().isEmpty().withMessage("Message is required"),
+  ],
+  validateRequest,
+  async (req: Request, res: Response) => {
+    const { name, email, message } = req.body;
 
-    const html=`
+    const html = `
     <!DOCTYPE html>
 <html>
 <head>
@@ -274,13 +283,11 @@ router.post(
 
     `;
 
-
     const options = {
       email: email,
       subject: "Contact Us",
       html: html,
     };
-
 
     try {
       sendEmail(options);
@@ -289,12 +296,8 @@ router.post(
       throw new BadRequestError("Email not sent");
     }
 
+    res.status(201).json({ message: "Email sent" });
+  }
+);
 
-    res.status(201).json({message:"Email sent"});
-
-  })
-
-    
-
-
-export {router as userRoutes}
+export { router as userRoutes };

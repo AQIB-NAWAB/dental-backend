@@ -27,7 +27,7 @@ app.use(cookieSession({
 }));
 app.use(
   cors({
-    origin: ['http://dental-strivers.vercel.app'],
+    origin: 'https://dental-strivers.vercel.app',
     methods: ['POST', 'GET', 'PUT', 'DELETE'],
     credentials: true,
   })

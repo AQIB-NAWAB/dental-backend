@@ -24,6 +24,9 @@ app.set('trust proxy', true);
 app.use(json());
 app.use(cookieSession({
   signed: false,
+  secure: true,
+  sameSite: 'none',
+  maxAge: 24 * 60 * 60 * 1000,
 }));
 app.use(
   cors({

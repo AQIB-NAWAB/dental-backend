@@ -28,6 +28,7 @@ router.post(
   validateRequest,
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const { packageName, price, courseId, start, end, packageType } = req.body;
 
@@ -117,6 +118,7 @@ router.delete(
   "/api/packages/:id",
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const packageToDelete = await Package.findById(req.params.id);
 
@@ -160,6 +162,7 @@ router.put(
   validateRequest,
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const { packageName, price, start, end, packageType } = req.body;
 

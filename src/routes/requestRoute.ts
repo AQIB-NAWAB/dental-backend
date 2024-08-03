@@ -95,6 +95,7 @@ router.get(
   "/api/tickets",
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const tickets = await Ticket.find({ status: "pending" }).populate('createdBy')
       .populate("courseId")
@@ -109,6 +110,7 @@ router.delete(
   "/api/tickets/:id",
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const ticket = await Ticket.findById(req.params.id);
 
@@ -130,6 +132,7 @@ router.put(
   validateRequest,
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const ticket = await Ticket.findById(req.params.id);
 
@@ -170,6 +173,7 @@ router.get(
   "/api/pendingtickets",
   currentUser,
   requireAuth,
+  isAdmin,
   async (req: Request, res: Response) => {
     const tickets = await Ticket.find({ status: "pending" })
       .populate("courseId")

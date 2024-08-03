@@ -68,7 +68,7 @@ router.post("/api/content",currentUser,requireAuth,[
     body("weekNo").not().isEmpty().withMessage("weekNo is required"),
     body("topic").not().isEmpty().withMessage("topic is required"),
     body("lectureNo").not().isEmpty().withMessage("lecture No  is required")
-],validateRequest,async(req:Request,res:Response)=>{
+],validateRequest,currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
 
 
     const {courseId,packageId,packageName,contentType,weekNo,lectureNo}=req.body;

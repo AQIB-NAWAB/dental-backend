@@ -74,7 +74,7 @@ router.post("/api/courses",[
     body("title").not().isEmpty().withMessage("Title is required"),
     body("description").not().isEmpty().withMessage("Description is required"),
     body("image").not().isEmpty().withMessage("Image is required"),
-],validateRequest,currentUser,requireAuth,async(req:Request,res:Response)=>{
+],validateRequest,currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
     const {title,description,image}=req.body;
     const course=Course.build({title,description,image,packages:[]});
     await course.save();
@@ -84,7 +84,7 @@ router.post("/api/courses",[
 
 // get all users who have purchased a course 
 
-router.get("/api/active-users",currentUser,requireAuth,async(req:Request,res:Response)=>{
+router.get("/api/active-users",currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
 
 
 const activeCourses=await Ticket.find({status:"approve"}).populate('createdBy').populate('packageId').populate('courseId');
@@ -104,7 +104,7 @@ router.delete("/api/active-users",
     ],
     validateRequest
     ,   
-    currentUser,requireAuth,async(req:Request,res:Response)=>{
+    currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
 
 const {userId,courseId,packageId}=req.body;
 

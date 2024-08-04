@@ -155,6 +155,7 @@ router.post(
     user.password = newPassword;
     await user.save();
 
+
     res.status(200).send({ message: "Password updated successfully" });
   }
 );

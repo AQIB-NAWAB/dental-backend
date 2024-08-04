@@ -4,7 +4,7 @@ import { json } from 'body-parser';
 import mongoose from 'mongoose';
 import cookieSession from 'cookie-session';
 import cors from 'cors';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { NotFoundError } from './errors/not-found-error';
 import { errorHandler } from './middlewares/error-handler';
 
@@ -44,13 +44,27 @@ app.use(
   })
 );
 
+
 app.get('/proxy', async (req: Request, res: Response) => {
   const url = req.query.url as string;
+  
+  if (!url) {
+    return res.status(400).send('URL query parameter is required');
+  }
+
   try {
     const response = await axios.get(url, { responseType: 'arraybuffer' });
     res.set('Content-Type', response.headers['content-type']);
     res.send(response.data);
   } catch (error) {
+    // TypeScript type guard to handle AxiosError or generic Error
+    if (axios.isAxiosError(error)) {
+      console.error('Axios error fetching PDF:', error.message);
+      console.error(error.stack);
+    } else {
+      console.error('Unknown error fetching PDF:', (error as Error).message);
+      console.error((error as Error).stack);
+    }
     res.status(500).send('Error fetching PDF');
   }
 });

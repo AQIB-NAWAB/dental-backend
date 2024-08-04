@@ -45,7 +45,7 @@ router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res
 
         const ticket=await Ticket.findOne({email:user?.email,courseId,packageId});
 
-        const limit=ticket?.mocksPurcahsed || 2;
+        const limit=ticket?.mocksPurchased || 2;
 
         
         const content=await Content.find({courseId,packageId,contentType:"mock"}).limit(limit);

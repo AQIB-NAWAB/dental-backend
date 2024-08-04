@@ -172,17 +172,7 @@ router.get(
       throw new BadRequestError("User not found");
     }
 
-    const userJwt = jwt.sign(
-      {
-        id: user.id,
-        email: user.email,
-      },
-      process.env.JWT_SECRET!
-    );
-
-    req.session = {
-      jwt: userJwt,
-    };
+  
 
   
     res.status(201).send(user);

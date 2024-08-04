@@ -101,8 +101,6 @@ router.post(
 
 router.get(
   "/api/packages/:id",
-  currentUser,
-  requireAuth,
   async (req: Request, res: Response) => {
     const packages = await Package.find({ courseId: req.params.id });
 

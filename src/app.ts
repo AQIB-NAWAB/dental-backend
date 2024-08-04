@@ -21,13 +21,24 @@ const app = express();
 
 app.set('trust proxy', true);
 
-app.use(json());
+app.use(express.json(
+  {
+    limit: '50mb',
+  }
+));
+
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
 app.use(cookieSession({
   signed: false,
+  secure: true,
+  sameSite: 'none',
+  maxAge: 24 * 60 * 60 * 1000,
+
 }));
 app.use(
   cors({
-    origin: ['http://dental-strivers.vercel.app', 'http://localhost:5173'],
+    origin: ['https://dental-strivers.vercel.app','http://localhost:5173'],
     methods: ['POST', 'GET', 'PUT', 'DELETE'],
     credentials: true,
   })

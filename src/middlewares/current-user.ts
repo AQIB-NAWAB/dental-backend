@@ -1,5 +1,6 @@
 import { Request,Response,NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { BadRequestError } from "../errors/bad-request-error";
 interface UserPayload{
     id:string;
     email:string;
@@ -21,6 +22,8 @@ export const currentUser=(req:Request,res:Response,next:NextFunction)=>{
     const payload=jwt.verify(req.session.jwt,process.env.JWT_SECRET!) as UserPayload;
     req.currentUser=payload;
   }catch(error){
+    console.log(error);
+    throw new BadRequestError("Invalid token");
   }
   next();
 }

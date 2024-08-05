@@ -294,4 +294,203 @@ router.post(
   }
 );
 
+
+// Reset Password
+
+router.post(
+  "/api/reset-password",
+  [
+    body("email").isEmail().withMessage("Email must be valid"),
+  ],
+  validateRequest,
+  async (req: Request, res: Response) => {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new BadRequestError("User not found");
+    }
+
+    const resetToken = jwt.sign(
+      {
+        id: user.id,
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1h" }
+    );
+
+    user.resetToken = resetToken;
+    await user.save();
+
+    const html = `
+    <!DOCTYPE html>
+<html>
+<head>
+    <title>Request Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+        .header h1 {
+            color: #007BFF;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .content p {
+            margin: 0 0 10px;
+        }
+        .footer {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            color: #888;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: white !important; 
+            background-color: #007BFF;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Dental Strivers</h1>
+        </div>
+        <div class="content">
+            <h2>Reset Password</h2>
+            <p>Dear ${user.name},</p>
+            <p>
+            You are receiving this email because you have requested to reset your password.
+            </p>
+            <p>Please click the link below to reset your password.</p>
+            <a href="${process.env.LIVE_URL}/reset-password/${resetToken}" class="btn">Reset Password</a>
+            <p>If you did not request a password reset, please ignore this email.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2024 Dental Strivers. All rights reserved.</p>
+            <p>123 Dental Street, Smile City, 45678</p>
+        </div>
+    </div>
+</body>
+</html>
+
+    `;
+
+    const options = {
+      email: email,
+      subject: "Reset Password",
+      html: html,
+    };
+
+    try {
+      sendEmail(options);
+    } catch (err) {
+      console.log(err);
+      throw new BadRequestError("Email not sent");
+    }
+
+    res.status(201).json({ message: resetToken });
+  }
+
+);
+
+
+
+// token validation
+
+router.post(
+  "/api/validate-token",
+  async (req: Request, res: Response) => {
+    const { token,password } = req.body;
+
+
+    if (!token ) {
+      throw new BadRequestError("Invalid token");
+    
+    }
+
+    if (!password ) {
+      throw new BadRequestError("Password is required");
+    
+    }
+
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET!);
+
+      
+
+      const { id } = payload as { id: string };
+
+
+      const user = await User.findById(id);
+
+
+      if (!user) {
+        throw new BadRequestError("Invalid token");
+      }
+
+
+      // check if the token is the same as the one in the database
+
+      if (user.resetToken !== token) {
+        throw new BadRequestError("Invalid token");
+      }
+
+
+
+      // remove the token from the database
+
+      user.resetToken = "";
+
+      // hash the password
+
+      user.password = password;
+
+
+      await user.save();
+
+
+      res.status(200).send({ message: "Password Reset Sucessfully" });
+
+    } catch (err) {
+      throw new BadRequestError("Invalid token");
+    }
+  }
+);
+
+
+
+
+
+
+
 export { router as userRoutes };

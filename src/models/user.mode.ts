@@ -7,6 +7,7 @@ interface UserAttrs {
     name: string;
     courses: Array<{ courseId: mongoose.Schema.Types.ObjectId; packageId: mongoose.Schema.Types.ObjectId; }>;
     role: string;
+    resetToken?: string;
 }
 
 interface UserModel extends mongoose.Model<UserDoc> {
@@ -19,6 +20,7 @@ interface UserDoc extends mongoose.Document {
     name: string;
     courses: Array<{ courseId: mongoose.Schema.Types.ObjectId; packageId: mongoose.Schema.Types.ObjectId; }>;
     role: string;
+    resetToken?: string;
 }
 
 const userSchema = new mongoose.Schema({
@@ -51,6 +53,9 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         default: "user"
+    },
+    resetToken: {
+        type: String
     }
 }, {
     toJSON: {
@@ -74,6 +79,9 @@ userSchema.pre('save', async function(done) {
     }
     done();
 });
+
+
+
 
 const User = mongoose.model<UserDoc, UserModel>('User', userSchema);
 

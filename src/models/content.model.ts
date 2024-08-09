@@ -5,12 +5,9 @@ interface ContentAttrs {
     packageId: mongoose.Schema.Types.ObjectId;
     packageName: string;
     contentType: string;
-    mockLink: string;
-    weekNo: number;
     topic: string;
-    meetLink:string;
+    videoLink:string;
     pdfLink:string;
-    lectureNo:number;
 }
 
 interface ContentModel extends mongoose.Model<ContentDoc> {
@@ -23,12 +20,9 @@ interface ContentDoc extends mongoose.Document {
     packageId: mongoose.Schema.Types.ObjectId;
     packageName: string;
     contentType: string;
-    mockLink: string;
-    weekNo: number;
     topic: string;
-    meetLink:string;
+    videoLink:string;
     pdfLink:string;
-    lectureNo:number;
 
     
 }
@@ -50,26 +44,15 @@ const contentSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    mockLink: {
-        type: String,
-    },
-    weekNo: {
-        type: Number,
-        required: true
-    },
     topic: {
         type: String,
     },
-    meetLink: {
+    videoLink: {
         type: String,
     },
     pdfLink: {
         type: String,
     },
-    lectureNo: {
-        type: Number,
-        required: true
-    }
 }, {
     toJSON: {
         transform(doc, ret) {

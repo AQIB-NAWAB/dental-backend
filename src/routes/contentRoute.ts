@@ -70,7 +70,7 @@ router.post("/api/content",currentUser,requireAuth,isAdmin,[
     body("weekNo").not().isEmpty().withMessage("Week no is required"),
     body("lectureNo").not().isEmpty().withMessage("Lecture no is required"),
 ],validateRequest,async(req:Request,res:Response)=>{
-    const {courseId,packages,contentType,weekNo,lectureNo,topic,meetLink,pdfLink,mockLink}=req.body;
+    const {courseId,packages,contentType,topic,videoLink,pdfLink}=req.body;
     
     const course=await Course.findById(courseId);
 
@@ -85,7 +85,8 @@ router.post("/api/content",currentUser,requireAuth,isAdmin,[
         if(!targetedPackage){
             throw new BadRequestError("Package not found");
         }
-        const content=Content.build({courseId,packageId,contentType,weekNo,lectureNo,topic,meetLink,pdfLink,mockLink,packageName:targetedPackage.packageName});
+        const content=Content.build({
+            courseId,packageId,contentType,topic,packageName:targetedPackage.packageName,videoLink:videoLink,pdfLink:pdfLink});
         await content.save();
     }
     

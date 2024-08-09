@@ -65,7 +65,7 @@ router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res
 
 router.post("/api/content",currentUser,requireAuth,isAdmin,[
     body("courseId").not().isEmpty().withMessage("Course id is required"),
-    body("packages").isArray().not().isEmpty().withMessage("Packages is required"),
+    body("packages").isArray().not().isEmpty().withMessage("Atleast one package is required"),
     body("contentType").not().isEmpty().withMessage("Content type is required"),
 ],validateRequest,async(req:Request,res:Response)=>{
     const {courseId,packages,contentType,topic,videoLink,pdfLink}=req.body;

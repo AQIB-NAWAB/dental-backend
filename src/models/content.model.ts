@@ -42,7 +42,8 @@ const contentSchema = new mongoose.Schema({
     },
     contentType: {
         type: String,
-        required: true
+        required: true,
+        enum: ['video', 'pdf']
     },
     topic: {
         type: String,

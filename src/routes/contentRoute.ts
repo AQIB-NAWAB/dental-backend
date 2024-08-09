@@ -12,6 +12,7 @@ import { isAdmin } from "../middlewares/isAdmin";
 import { Content } from "../models/content.model";
 import { Package } from "../models/package.model";
 import { Ticket } from "../models/request.model";
+import { convert } from "../helper/helper";
 
 const router = express.Router();
 
@@ -40,12 +41,12 @@ router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res
 
     }
 
-    if(targetedPackage.packageType=="mocks" || targetedPackage.packageType=="mock"){
+    if(targetedPackage.packageType=="mock"){
         const user=await User.findById(req.currentUser!.id);
 
         const ticket=await Ticket.findOne({email:user?.email,courseId,packageId});
 
-        const limit=ticket?.mocksPurchased || 2;
+        const limit=(ticket?.mocksPurchased! * 8) || 8;
 
         
         const content=await Content.find({courseId,packageId,contentType:"mock"}).limit(limit);
@@ -59,57 +60,42 @@ router.get("/api/content/:courseId/:packageId",currentUser,async(req:Request,res
 
 });
 
-// add content to speicific course and package
 
-router.post("/api/content",currentUser,requireAuth,[
-    body("courseId").not().isEmpty().withMessage("courseId is required"),
-    body("packageId").not().isEmpty().withMessage("packageId is required"),
-    body("packageName").not().isEmpty().withMessage("packageName is required"),
-    body("contentType").not().isEmpty().withMessage("contentType is required"),
-    body("weekNo").not().isEmpty().withMessage("weekNo is required"),
-    body("topic").not().isEmpty().withMessage("topic is required"),
-    body("lectureNo").not().isEmpty().withMessage("lecture No  is required")
-],validateRequest,currentUser,requireAuth,isAdmin,async(req:Request,res:Response)=>{
+// Add content to a course
 
+router.post("/api/content",currentUser,requireAuth,isAdmin,[
+    body("courseId").not().isEmpty().withMessage("Course id is required"),
+    body("packages").isArray().not().isEmpty().withMessage("Packages is required"),
+    body("contentType").not().isEmpty().withMessage("Content type is required"),
+    body("weekNo").not().isEmpty().withMessage("Week no is required"),
+    body("lectureNo").not().isEmpty().withMessage("Lecture no is required"),
+],validateRequest,async(req:Request,res:Response)=>{
+    const {courseId,packages,contentType,weekNo,lectureNo,topic,meetLink,pdfLink,mockLink}=req.body;
+    
+    const course=await Course.findById(courseId);
 
-    const {courseId,packageId,packageName,contentType,weekNo,lectureNo}=req.body;
-
-
-    const coures=await Course.findById(courseId);
-
-    if(!coures){
+    if(!course){
         throw new BadRequestError("Course not found");
     }
 
-    const targetedPackage=await Package.findById(packageId);
 
-    if(!targetedPackage){
-        throw new BadRequestError("Package not found");
+    for(let i=0;i<packages.length;i++){
+        const packageId=packages[i];
+        const targetedPackage=await Package.findById(packageId);
+        if(!targetedPackage){
+            throw new BadRequestError("Package not found");
+        }
+        const content=Content.build({courseId,packageId,contentType,weekNo,lectureNo,topic,meetLink,pdfLink,mockLink,packageName:targetedPackage.packageName});
+        await content.save();
     }
-
-
-    if(contentType==="mock" || contentType==="mocks" ){
-        const {mockLink,topic}=req.body;
-        const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,mockLink,lectureNo,meetLink:"",pdfLink:""});  
-        await content.save();
-        return res.status(201).send(content);
-    }else if(contentType==="zoom"){
-        const {meetLink,topic}=req.body;
-        const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,meetLink,lectureNo,mockLink:"",pdfLink:""});  
-        await content.save();
-        return res.status(201).send(content);
-    }else if(contentType==="pdf"){
-        const {pdfLink,topic}=req.body;
-        const content=Content.build({courseId,packageId,packageName,contentType,weekNo,topic,pdfLink,lectureNo,mockLink:"",meetLink:""});  
-        await content.save();
-        return res.status(201).send(content);
-    }else{
-        throw new BadRequestError("Invalid content type");
-    }
+    
 
     res.send({message:"Content added successfully"});
 
 });
+
+
+
 
     
 // Delete content by id
@@ -125,4 +111,7 @@ router.delete("/api/content/",currentUser,requireAuth,isAdmin,async(req:Request,
 });
 
 
-export { router as contentRoutes };
+
+
+
+export { router as contentRoutes }

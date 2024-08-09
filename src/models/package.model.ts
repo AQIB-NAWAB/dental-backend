@@ -30,6 +30,7 @@ const packageSchema = new mongoose.Schema({
     packageName: {
         type: String,
         required: true,
+        enum:["Full Course","Lecture Only","Mock Only","Lecture and Quiz"]
     },
     start: {
         type: Date,
@@ -50,6 +51,7 @@ const packageSchema = new mongoose.Schema({
     packageType: {
         type: String,
         required: true,
+        enum:["mock","lectureOnly","fullCourse","lectureAndQuiz"]
     },
     mocksPrices: [{
         quantity: {

@@ -418,7 +418,7 @@ router.post(
       throw new BadRequestError("Email not sent");
     }
 
-    res.status(201).json({ message: resetToken });
+    res.status(201).json({ message: "Email sent" });
   }
 
 );
@@ -427,10 +427,11 @@ router.post(
 
 // token validation
 
-router.post(
-  "/api/validate-token",
+router.get(
+  "/api/validate-token/:token",
   async (req: Request, res: Response) => {
-    const { token,password } = req.body;
+
+    const { token } = req.params;
 
 
     if (!token ) {
@@ -438,10 +439,7 @@ router.post(
     
     }
 
-    if (!password ) {
-      throw new BadRequestError("Password is required");
-    
-    }
+  
 
     try {
       const payload = jwt.verify(token, process.env.JWT_SECRET!);
@@ -459,27 +457,30 @@ router.post(
       }
 
 
-      // check if the token is the same as the one in the database
+      // do the login stuff
 
-      if (user.resetToken !== token) {
-        throw new BadRequestError("Invalid token");
-      }
+      const userJwt = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+        },
+        process.env.JWT_SECRET!
+      );
 
 
+      req.session = {
+        jwt: userJwt,
+      };
 
-      // remove the token from the database
+
+      // remove the token from the user
 
       user.resetToken = "";
-
-      // hash the password
-
-      user.password = password;
-
 
       await user.save();
 
 
-      res.status(200).send({ message: "Password Reset Sucessfully" });
+      res.status(200).send(user);
 
     } catch (err) {
       throw new BadRequestError("Invalid token");
